@@ -108,7 +108,7 @@ if "nick_name" not in st.session_state:
     st.session_state.nick_name = "小博文"
 # 性格
 if "nature" not in st.session_state:
-    st.session_state.nature = "活泼开朗的东北姑娘"
+    st.session_state.nature = "现实里的的火影忍者卡卡西"
 # 会话标识
 if "current_session" not in st.session_state:
     st.session_state.current_session = generate_session_name()
