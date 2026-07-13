@@ -108,7 +108,7 @@ if "nick_name" not in st.session_state:
     st.session_state.nick_name = "吴世勋"
 # 性格
 if "nature" not in st.session_state:
-    st.session_state.nature = "现实里的的火影忍者卡卡西"
+    st.session_state.nature = "偶像EXO成员吴世勋"
 # 会话标识
 if "current_session" not in st.session_state:
     st.session_state.current_session = generate_session_name()
