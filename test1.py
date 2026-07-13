@@ -3,6 +3,7 @@ import os
 from openai import OpenAI
 from datetime import datetime
 import json
+import uuid
 from dotenv import load_dotenv
 
 # 加载 .env 文件中的环境变量
@@ -16,6 +17,13 @@ st.set_page_config(
     initial_sidebar_state="expanded", # 控制的是侧边栏的状态
     menu_items={}
 )
+
+# 获取当前用户的会话目录
+def get_user_dir():
+    user_dir = f"sessions/{st.session_state.user_id}"
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)
+    return user_dir
 
 # 生成会话标识函数
 def generate_session_name():
@@ -32,20 +40,17 @@ def save_session():
             "messages": st.session_state.messages
         }
 
-        # 如果 sessions 目录不存在, 则创建
-        if not os.path.exists("sessions"):
-            os.mkdir("sessions")
-
+        user_dir = get_user_dir()
         # 保存会话数据
-        with open(f"sessions/{st.session_state.current_session}.json", "w", encoding="utf-8") as f:
+        with open(f"{user_dir}/{st.session_state.current_session}.json", "w", encoding="utf-8") as f:
             json.dump(session_data, f, ensure_ascii=False, indent=2)
 
 # 加载所有的会话列表信息
 def load_sessions():
     session_list = []
-    # 加载sessions目录下的文件
-    if os.path.exists("sessions"):
-        file_list = os.listdir("sessions")
+    user_dir = f"sessions/{st.session_state.user_id}"
+    if os.path.exists(user_dir):
+        file_list = os.listdir(user_dir)
         for filename in file_list:
             if filename.endswith(".json"):
                 session_list.append(filename[:-5])
@@ -55,9 +60,10 @@ def load_sessions():
 # 加载指定的会话信息
 def load_session(session_name):
     try:
-        if os.path.exists(f"sessions/{session_name}.json"):
+        user_dir = f"sessions/{st.session_state.user_id}"
+        if os.path.exists(f"{user_dir}/{session_name}.json"):
             # 读取会话数据
-            with open(f"sessions/{session_name}.json", "r", encoding="utf-8") as f:
+            with open(f"{user_dir}/{session_name}.json", "r", encoding="utf-8") as f:
                 session_data = json.load(f)
                 st.session_state.messages = session_data["messages"]
                 st.session_state.nick_name = session_data["nick_name"]
@@ -69,8 +75,9 @@ def load_session(session_name):
 # 删除会话信息函数
 def delete_session(session_name):
     try:
-        if os.path.exists(f"sessions/{session_name}.json"):
-            os.remove(f"sessions/{session_name}.json") # 删除文件
+        user_dir = f"sessions/{st.session_state.user_id}"
+        if os.path.exists(f"{user_dir}/{session_name}.json"):
+            os.remove(f"{user_dir}/{session_name}.json") # 删除文件
             # 如果删除的是当前会话, 则需要更新消息列表
             if session_name == st.session_state.current_session:
                 st.session_state.messages = []
@@ -101,6 +108,8 @@ system_prompt = """
     """
 
 # 初始化聊天信息
+if "user_id" not in st.session_state:
+    st.session_state.user_id = str(uuid.uuid4())
 if "messages" not in st.session_state:
     st.session_state.messages = []
 # 昵称
